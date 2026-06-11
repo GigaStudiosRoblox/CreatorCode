@@ -110,7 +110,7 @@ client.on('interactionCreate', async interaction => {
                     $set: { total: finalTotal }
                 }
             );
-            interaction.reply({content: `✅ Data Refreshed for ${targetUser.username}\n• **Code:** \`${doc.code}\`\n• **Weight:** \`${currentWeight}\` → \`0\`\n• **Weight:** \`${currentTotal}\` → \`${finalTotal}\``});
+            interaction.reply({content: `✅ Data Refreshed for ${targetUser.username}\n• **Code:** \`${doc.code}\`\n• **Weight:** \`${currentWeight}\` → \`0\`\n• **Total:** \`${currentTotal}\` → \`${finalTotal}\``});
         } else {
             interaction.reply({content: `❌ ${targetUser.username} does not have a creator code profile to refresh.`, ephemeral: true });
         }
