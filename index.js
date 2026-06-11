@@ -64,8 +64,8 @@ app.listen(3000, () => console.log('🌐 Web Server running on port 3000'));
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // --- PERMISSION GUARD ---
-const ALLOWED_USER_IDS = ['594184472656609281'];
-const ALLOWED_ROLE_IDS = ['1514422258221715547'];
+const ALLOWED_USER_IDS = ['865837236870971413', '982798552151502888', '594184472656609281'];
+const ALLOWED_ROLE_IDS = ['1457495907896660101', '1513753571840229376', '1457496644944793642', '1457496681099558982', '1462650352884125831'];
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;
