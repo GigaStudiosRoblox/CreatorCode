@@ -106,8 +106,10 @@ client.on('interactionCreate', async interaction => {
             await CreatorCode.updateOne(
                 { userId: targetUser.id },
                 { 
-                    $set: { weight: 0 },
-                    $set: { total: finalTotal }
+                    $set: { 
+                        weight: 0,
+                        total: finalTotal
+                    }
                 }
             );
             interaction.reply({content: `✅ Data Refreshed for ${targetUser.username}\n• **Code:** \`${doc.code}\`\n• **Weight:** \`${currentWeight}R$\` → \`0R$\`\n• **Total:** \`${currentTotal}R$\` → \`${finalTotal}R$\``});
