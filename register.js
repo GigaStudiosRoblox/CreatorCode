@@ -12,8 +12,8 @@ const commands = [
       ] 
   },
   {
-      name: 'refresh',
-      description: 'Resets a user\'s purchase count to 0 and returns the previous total',
+      name: 'withdraw',
+      description: 'Resets a user\'s weight to 0 and adds it to the total',
       options: [{ name: 'user', type: 6, description: 'The user to reset', required: true }]
   },
   { 
@@ -28,11 +28,6 @@ const commands = [
           { name: 'user', type: 6, description: 'The user to modify', required: true },
           { name: 'new_code', type: 3, description: 'The new creator code', required: true }
       ] 
-  },
-  { 
-      name: 'fetch', 
-      description: 'Gets the creator code for a specific user',
-      options: [{ name: 'user', type: 6, description: 'The user to check', required: true }]
   },
   { 
       name: 'destroy', 

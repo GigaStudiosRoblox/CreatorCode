@@ -16,7 +16,8 @@ mongoose.connect(process.env.MONGODB_URI)
 const codeSchema = new mongoose.Schema({
     userId: { type: String, required: true, unique: true }, // unique: true ensures O(1) lookups
     code: { type: String, required: true, unique: true },
-    purchases: { type: Number, default: 0 }
+    weight: { type: Number, default: 0 },
+    total: { type: Number, default: 0 }
 });
 
 // Create the model
@@ -40,19 +41,19 @@ app.post('/api/purchase', async (req, res) => {
     const { player, name, price, code } = req.body;
     const upperCode = code.toUpperCase();
 
-    // Find the code and increment purchases by 1 in a single action
+    // Find the code and increment weight by 1 in a single action
     const updatedData = await CreatorCode.findOneAndUpdate(
         { code: upperCode }, 
-        { $inc: { purchases: 1 } },
+        { $inc: { weight: price } },
         { new: true } // Returns the updated document
     );
 
     if (updatedData) {
         const channel = await client.channels.fetch(process.env.CHANNEL_ID);
-        channel.send(`🎉 **Purchase Alert!** Player \`${player}\` bought \`${name}\` using code **${upperCode}**!`);
+        channel.send(`🎉 **Purchase Alert!** Player \`${player}\` bought \`${name}\` for \`${price}R$\` using code **${upperCode}**!`);
         res.json({ success: true });
     } else {
-        channel.send(`📛 **Purchase Alert!** Player \`${player}\` bought \`${name}\`, but did not register for code **${upperCode}**!`)
+        channel.send(`📛 **Purchase Alert!** Player \`${player}\` bought \`${name}\` for \`${price}R$\`, but did not register for code **${upperCode}**!`)
         res.status(400).json({ success: false, message: "Invalid code" });
     }
 });
@@ -94,24 +95,31 @@ client.on('interactionCreate', async interaction => {
         interaction.reply(`✅ Created code **${code}** for ${targetUser.username}.`);
     }
 
-    if (commandName === 'refresh') {
+    if (commandName === 'withdraw') {
 
-        const updatedData = await CreatorCode.findOneAndUpdate(
-            { userId: targetUser.id },
-            { purchases: 0 }
-        );
+        const doc = await CreatorCode.findOne({ userId: targetUser.id });
 
-        if (updatedData) {
-            interaction.reply({content: `✅ Data Refreshed for ${targetUser.username}\n• **Code:** \`${updatedData.code}\`\n• **Purchases before reset:** \`${localPreviousCount}\`\n• **Current Purchases:** \`0\``});
+        if (doc) {
+            const currentWeight = doc.weight;
+            const currentTotal = doc.total;
+            const finalTotal = currentTotal + currentWeight;
+            await CreatorCode.updateOne(
+                { userId: targetUser.id },
+                { 
+                    $set: { weight: 0 },
+                    $set: { total: finalTotal }
+                }
+            );
+            interaction.reply({content: `✅ Data Refreshed for ${targetUser.username}\n• **Code:** \`${doc.code}\`\n• **Weight:** \`${currentWeight}\` → \`0\`\n• **Weight:** \`${currentTotal}\` → \`${finalTotal}\``});
         } else {
             interaction.reply({content: `❌ ${targetUser.username} does not have a creator code profile to refresh.`, ephemeral: true });
         }
     }
 
     if (commandName === 'info') {
-        const userData = await CreatorCode.findOne({ userId: targetUser.id });
-        if (userData) {
-            interaction.reply(`✅ Data found!\n• **User:** ${targetUser.username}\n• **Code:** ${userData.code}\n• **Total Purchases:** ${userData.purchases}`);
+        const doc = await CreatorCode.findOne({ userId: targetUser.id });
+        if (doc) {
+            interaction.reply(`✅ Data found!\n• **User:** ${targetUser.username}\n• **Code:** ${doc.code}\n• **Weight:** ${doc.weight}\n• **Total:** ${doc.total}`);
         } else {
             interaction.reply({ content: `❌ No data found for ${targetUser.username}.`, ephemeral: true });
         }
@@ -123,31 +131,22 @@ client.on('interactionCreate', async interaction => {
         const codeExists = await CreatorCode.findOne({ code: newCode });
         if (codeExists) return interaction.reply({ content: `❌ The code **${newCode}** is already taken!`, ephemeral: true });
         
-        const updatedData = await CreatorCode.findOneAndUpdate(
+        const doc = await CreatorCode.findOneAndUpdate(
             { userId: targetUser.id },
             { code: newCode }
         ); // Doesn't return the new data by default, which is fine because we need the old code anyway
 
-        if (updatedData) {
-            interaction.reply(`✅ Altered code for ${targetUser.username}. \n• **Old Code:** ${updatedData.code}\n• **New Code:** ${newCode}\n• *(Purchases are still at ${userData.purchases})*`);
+        if (doc) {
+            interaction.reply(`✅ Altered code for ${targetUser.username}. \n• **Old Code:** ${doc.code}\n• **New Code:** ${newCode}\n• *(Weight and Total haven't changed)*`);
         } else {
             interaction.reply({ content: `❌ ${targetUser.username} does not have any data to alter. Use /create first.`, ephemeral: true });
         }
     }
 
-    if (commandName === 'fetch') {
-        const userData = await CreatorCode.findOne({ userId: targetUser.id });
-        if (userData) {
-            interaction.reply(`✅ ${targetUser.username}'s creator code is **${userData.code}**.`);
-        } else {
-            interaction.reply({ content: `❌ ${targetUser.username} does not have a creator code.`, ephemeral: true });
-        }
-    }
-
     if (commandName === 'destroy') {
-        const deletedData = await CreatorCode.findOneAndDelete({ userId: targetUser.id });
-        if (deletedData) {
-            interaction.reply(`✅ Destroyed data for ${targetUser.username}. Extracted code: **${deletedData.code}**.`);
+        const doc = await CreatorCode.findOneAndDelete({ userId: targetUser.id });
+        if (doc) {
+            interaction.reply(`✅ Destroyed data for ${targetUser.username}. Extracted code: **${doc.code}**.`);
         } else {
             interaction.reply({ content: `❌ ${targetUser.username} does not have any data to destroy.`, ephemeral: true });
         }
