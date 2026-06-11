@@ -88,11 +88,11 @@ client.on('interactionCreate', async interaction => {
         if (userExists) return interaction.reply({ content: `❌ ${targetUser.username} already has a code!`, ephemeral: true });
         
         const codeExists = await CreatorCode.findOne({ code: code });
-        if (codeExists) return interaction.reply({ content: `❌ The code **${code}** is already taken by user's ID ${codesDB[code]}!`, ephemeral: true });
+        if (codeExists) return interaction.reply({ content: `❌ The code \`${code}\` is already taken by user's ID ${codesDB[code]}!`, ephemeral: true });
 
         // Insert the data
         await CreatorCode.create({ userId: targetUser.id, code: code });
-        interaction.reply(`✅ Created code **${code}** for ${targetUser.username}.`);
+        interaction.reply(`✅ Created code \`${code}\` for ${targetUser.username}.`);
     }
 
     if (commandName === 'withdraw') {
@@ -110,7 +110,7 @@ client.on('interactionCreate', async interaction => {
                     $set: { total: finalTotal }
                 }
             );
-            interaction.reply({content: `✅ Data Refreshed for ${targetUser.username}\n• **Code:** \`${doc.code}\`\n• **Weight:** \`${currentWeight}\` → \`0\`\n• **Total:** \`${currentTotal}\` → \`${finalTotal}\``});
+            interaction.reply({content: `✅ Data Refreshed for ${targetUser.username}\n• **Code:** \`${doc.code}\`\n• **Weight:** \`${currentWeight}R$\` → \`0R$\`\n• **Total:** \`${currentTotal}R$\` → \`${finalTotal}R$\``});
         } else {
             interaction.reply({content: `❌ ${targetUser.username} does not have a creator code profile to refresh.`, ephemeral: true });
         }
@@ -119,7 +119,7 @@ client.on('interactionCreate', async interaction => {
     if (commandName === 'info') {
         const doc = await CreatorCode.findOne({ userId: targetUser.id });
         if (doc) {
-            interaction.reply(`✅ Data found!\n• **User:** ${targetUser.username}\n• **Code:** ${doc.code}\n• **Weight:** ${doc.weight}\n• **Total:** ${doc.total}`);
+            interaction.reply(`✅ Data found!\n• **User:** ${targetUser.username}\n• **Code:** \`${doc.code}\`\n• **Weight:** \`${doc.weight}R$\`\n• **Total:** \`${doc.total}R$\``);
         } else {
             interaction.reply({ content: `❌ No data found for ${targetUser.username}.`, ephemeral: true });
         }
@@ -129,7 +129,7 @@ client.on('interactionCreate', async interaction => {
         const newCode = options.getString('new_code').toUpperCase();
 
         const codeExists = await CreatorCode.findOne({ code: newCode });
-        if (codeExists) return interaction.reply({ content: `❌ The code **${newCode}** is already taken!`, ephemeral: true });
+        if (codeExists) return interaction.reply({ content: `❌ The code \`${newCode}\` is already taken!`, ephemeral: true });
         
         const doc = await CreatorCode.findOneAndUpdate(
             { userId: targetUser.id },
@@ -137,7 +137,7 @@ client.on('interactionCreate', async interaction => {
         ); // Doesn't return the new data by default, which is fine because we need the old code anyway
 
         if (doc) {
-            interaction.reply(`✅ Altered code for ${targetUser.username}. \n• **Old Code:** ${doc.code}\n• **New Code:** ${newCode}\n• *(Weight and Total haven't changed)*`);
+            interaction.reply(`✅ Altered code for ${targetUser.username}. \n• **Old Code:** \`${doc.code}\`\n• **New Code:** \`${newCode}\`\n• *(Weight and Total haven't changed)*`);
         } else {
             interaction.reply({ content: `❌ ${targetUser.username} does not have any data to alter. Use /create first.`, ephemeral: true });
         }
@@ -146,7 +146,7 @@ client.on('interactionCreate', async interaction => {
     if (commandName === 'destroy') {
         const doc = await CreatorCode.findOneAndDelete({ userId: targetUser.id });
         if (doc) {
-            interaction.reply(`✅ Destroyed data for ${targetUser.username}. Extracted code: **${doc.code}**.`);
+            interaction.reply(`✅ Destroyed data for ${targetUser.username}. Extracted code: \`${doc.code}\``);
         } else {
             interaction.reply({ content: `❌ ${targetUser.username} does not have any data to destroy.`, ephemeral: true });
         }
