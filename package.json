@@ -2,9 +2,9 @@
   "name": "creatorcode",
   "version": "1.0.0",
   "description": "Handles the Roblox feature called \"Creator Code\".",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "register": "node register.js",
+    "start": "node register.js && node index.js"
   },
   "keywords": [],
   "author": "",
