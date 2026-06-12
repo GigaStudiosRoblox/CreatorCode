@@ -43,7 +43,7 @@ app.post('/api/purchase', async (req, res) => {
     const { player, name, price, code } = req.body;
     const upperCode = code.toUpperCase();
 
-    const gain = price * revenu;
+    const gain = Math.round(price * revenu);
 
     // Find the code and increment weight by 1 in a single action
     const updatedData = await CreatorCode.findOneAndUpdate(
