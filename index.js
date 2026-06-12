@@ -37,20 +37,24 @@ app.get('/api/validate/:code', async (req, res) => {
     }
 });
 
+const revenu = 0.10;
+
 app.post('/api/purchase', async (req, res) => {
     const { player, name, price, code } = req.body;
     const upperCode = code.toUpperCase();
 
+    const gain = price * revenu;
+
     // Find the code and increment weight by 1 in a single action
     const updatedData = await CreatorCode.findOneAndUpdate(
         { code: upperCode }, 
-        { $inc: { weight: price } },
+        { $inc: { weight: gain } },
         { new: true } // Returns the updated document
     );
 
     if (updatedData) {
         const channel = await client.channels.fetch(process.env.CHANNEL_ID);
-        channel.send(`🎉 **Purchase Alert!** Player \`${player}\` bought \`${name}\` for \`${price}R$\` using code **${upperCode}**!`);
+        channel.send(`🎉 **Purchase Alert!** Player \`${player}\` bought \`${name}\` for \`${price}R$\` using code **${upperCode}**, and GAINED \`${gain}R$\`!`);
         res.json({ success: true });
     } else {
         channel.send(`📛 **Purchase Alert!** Player \`${player}\` bought \`${name}\` for \`${price}R$\`, but did not register for code **${upperCode}**!`)
